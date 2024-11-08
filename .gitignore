@@ -25,3 +25,9 @@ doc/
 
 # Vagrant artifacts
 ubuntu-*-console.log
+
+# Invironment files
+.env
+
+# Node
+node_modules
