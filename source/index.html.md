@@ -26,6 +26,10 @@ meta:
 測試機 API Base Url：`https://api.goer.live/senserobot`<br>
 正式機 API Base Url：`https://api.heijiajia.com.tw/senserobot`<br>
 
+### 測試機 QR Code
+
+`https://drive.google.com/file/d/1UwWDr_z67pcM4boJwDAjHnhPqAMK0_Vr/view?usp=sharing`
+
 ### 參考檔案
 
 [對弈規則對照表](https://docs.google.com/spreadsheets/d/1DJf0i_epSYATxJ6K4ce6gE_tHNUq93iI/edit?usp=sharing&ouid=106936800859393192316&rtpof=true&sd=true)<br>
@@ -38,12 +42,17 @@ meta:
 13 路: 88<br>
 19 路: 185<br>
 
+<aside class="notice">
+api 所有的 sgf 請包含 SZ、KM 這兩個 header<br>
+</aside>
+
 # 簽名驗證
 
 > 簽名驗證
 
 ```javascript
-const SECRET_TOKEN = 'USER SECRET TOKEN';
+const BINDING_TOKEN = '18bab88e-f748-4c2f-90ef-4101dea365a4';
+const SECRET_TOKEN = '897c1608-15a1-4f28-81db-c3cce51eddc6';
 
 function generateSignature(dataString) {
   const keyByte = Buffer.from(SECRET_TOKEN, 'utf8');
@@ -59,15 +68,22 @@ function generateSignature(dataString) {
 
 ```javascript
 // 如果是 POST 方法
-const data = {a: '123', b: '456'};
+const url = 'https://api.goer.live/senserobot/ladder/game/move';
+const data = {
+  sgf: '(;KM[6.5]SZ[19];B[pd];W[dp];B[pp];W[dc];B[de];W[ce];B[cf];W[cd];B[df];W[fc];B[cn])',
+  level: 100,
+};
 const dataString = JSON.stringify(data);
 const signature = generateSignature(dataString);
+// NmUxNzgyZmRmMDFmNzYwZjBkYjBhNTExZTM0NWE2NGZjMDc4OTZkNjYxYjQ5MDZkMWMxNGVjYjE0ZmQwZmFmNw==
+
 const response = await axios({
   method: 'post',
   url,
   data,
   headers: {
     'GOER-PLATFORM': 'SENSEROBOT',
+    'GOER-TOKEN': BINDING_TOKEN,
     'GOER-SIGNATURE': signature,
   },
 });
@@ -75,13 +91,17 @@ const response = await axios({
 
 ```javascript
 // 如果是 GET 方法
-const dataString = 'a=123&b=456';
+const url = 'https://api.goer.live/senserobot/ladder/game/1';
+const dataString = '/ladder/game/1';
 const signature = generateSignature(dataString);
+// NDliNjZiMzI5ZmU0NDQwMTdhMWJkZWFkOWUyNTIyMzU0YWZiMmI2Y2RkZmI3ZWUzMmFlMzc4N2E0MTk1Y2QwNA==
+
 const response = await axios({
   method: 'get',
   url,
   headers: {
     'GOER-PLATFORM': 'SENSEROBOT',
+    'GOER-TOKEN': BINDING_TOKEN,
     'GOER-SIGNATURE': signature,
   },
 });
@@ -89,12 +109,17 @@ const response = await axios({
 
 透過 Request Payload 與 Secret Token 計算 HMAC-SHA256，可參考右側範例。<br>
 <br>
-後續發送 Request，請在 headers 代入 `GOER-PLATFORM` 和 `GOER-SIGNATURE`。<br>
+後續發送 Request，請在 headers 代入 `GOER-PLATFORM`、`GOER-TOKEN` 和 `GOER-SIGNATURE`。<br>
 `GOER-PLATFORM` 固定代入常數 `SENSEROBOT`。<br>
+`GOER-TOKEN` 代入掃碼取得的 Binding Token。<br>
 `GOER-SIGNATURE` 代入簽名。<br>
 
 <aside class="notice">
 GET 和 POST 產生 dataString 的方法不同，請留意。
+</aside>
+
+<aside class="notice">
+可搭配下方的「掃碼綁定帳號」api 文檔一起閱讀。
 </aside>
 
 # 帳號權限相關
@@ -109,7 +134,11 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 }
 ```
 
-掃碼綁定帳號，並取得使用者秘密金鑰，用來後續簽名
+圍棋機器人掃描 QR Code 後，會取得 Binding Token。<br>
+以 Binding Token 呼叫此綁定帳號的 API 後，會取得 Secret Token。<br>
+請將 Binding Token 和 Secret Token 儲存起來。<br>
+Binding Token 請於每次 API 呼叫時，置入 Headers 的 `GOER-TOKEN`。<br>
+Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-SIGNATURE`。<br>
 
 ### HTTP Request
 
@@ -122,8 +151,7 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 | bindingToken | String | True     |         | 掃碼得到的綁定 token |
 
 <aside class="notice">
-綁定帳號後，response 會回傳 secretToken。<br>後續發送 API 請用 secretToken 和 payload 計算出簽名，<br>
-並將簽名 signature 夾帶於所有 request 之中。<br>
+可搭配上方的「簽名驗證」文檔一起閱讀。
 </aside>
 
 # 選單資訊相關
@@ -134,13 +162,13 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 
 ```json
 [
-  {"level": 1, "boardSize": 9},
-  {"level": 2, "boardSize": 9},
-  {"level": 3, "boardSize": 9, "label": "G19"},
-  {"level": 4, "boardSize": 9},
-  {"level": 5, "boardSize": 9},
-  {"level": 6, "boardSize": 9, "label": "G18"},
-  {"level": 7, "boardSize": 9}
+  {"level": 1, "boardSize": 9, "isPassed": true},
+  {"level": 2, "boardSize": 9, "isPassed": true},
+  {"level": 3, "boardSize": 9, "isPassed": true, "label": "G19"}, // 有標註 label 的代表星星關卡
+  {"level": 4, "boardSize": 9, "isPassed": true},
+  {"level": 5, "boardSize": 9, "isPassed": true},
+  {"level": 6, "boardSize": 9, "isPassed": true, "label": "G18"},
+  {"level": 7, "boardSize": 9, "isPassed": false}
 ]
 ```
 
@@ -149,6 +177,14 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 ### HTTP Request
 
 `[GET] /ladder/game`
+
+<aside class="notice">
+有標註 label 的代表星星關卡。<br>
+</aside>
+
+<aside class="notice">
+使用者依序闖關，不允許跳關。<br>
+</aside>
 
 ## 天梯對局－取得單一關卡資訊
 
@@ -209,6 +245,11 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 
 `[GET] /course`
 
+<aside class="notice">
+未購買的課程不列出。<br>
+若回傳空 array，表示使用者並未購買任何正式課程。<br>
+</aside>
+
 ## 課程下棋闖關－取得關卡列表
 
 > Response:
@@ -218,17 +259,20 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
   {
     "aiId": "1",
     "name": "Bubu",
-    "boarsSize": 9
+    "boarsSize": 9,
+    "isPassed": true
   },
   {
     "aiId": "2",
     "name": "Tommy",
-    "boarsSize": 9
+    "boarsSize": 9,
+    "isPassed": true
   },
   {
     "aiId": "3",
     "name": "Sara",
-    "boarsSize": 9
+    "boarsSize": 9,
+    "isPassed": false
   }
 ]
 ```
@@ -247,7 +291,8 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 {
   "aiId": 1,
   "name": "Bubu",
-  "boardSize": 9
+  "boardSize": 9,
+  "isPassed": true
 }
 ```
 
@@ -271,13 +316,12 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 
 ```json
 {
-  "sgf": "(;KM[6.5]SZ[19];B[pd];W[dp];B[pp];W[dc];B[de])",
-  "move": "de",
-  "isWin": null
+  "sgf": "(;KM[7.5]SZ[19];B[pd];W[dp];B[pp];W[dc];B[de])",
+  "move": "de"
 }
 ```
 
-天梯闖關對局的落子 API，傳入關卡數後會自動代入相關對弈設定
+天梯闖關對局的落子 API，傳入關卡數後會自動代入相關對弈設定。
 
 ### HTTP Request
 
@@ -290,15 +334,19 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 | sgf       | String | True     |         | 棋譜 SGF    |
 | level     | Number | True     |         | 關卡數      |
 
+<aside class="notice">
+Ai 虛手時，response 的 move 回傳 pass。<br>
+Ai 投子時，response 的 move 回傳 resign。<br>
+</aside>
+
 ## 課程下棋闖關－落子
 
 > Response:
 
 ```json
 {
-  "sgf": "(;KM[6.5]SZ[19];B[pd];W[dp];B[pp];W[dc];B[de])",
-  "move": "de",
-  "isWin": null
+  "sgf": "(;KM[7.5]SZ[19];B[pd];W[dp];B[pp];W[dc];B[de])",
+  "move": "de"
 }
 ```
 
@@ -314,6 +362,11 @@ GET 和 POST 產生 dataString 的方法不同，請留意。
 | --------- | ------ | -------- | ------- | ----------- |
 | sgf       | String | True     |         | 棋譜 SGF    |
 | aiId      | Number | True     |         | Ai ID       |
+
+<aside class="notice">
+Ai 虛手時，response 的 move 回傳 pass。<br>
+Ai 投子時，response 的 move 回傳 resign。<br>
+</aside>
 
 ## 天梯對局－更新對局記錄
 
@@ -391,12 +444,13 @@ result的各種表達方式<br>
 > 9 路棋盤，influence 長度為 81。<br>
 > 13 路棋盤，influence 長度為 169。<br>
 > 19 路棋盤，influence 長度為 361。<br>
-> X 代表黑子
-> x 代表黑棋的領地
-> b 代表白死子
-> O 代表白子
-> o 代表白棋的領地
-> w 代表白死子
+> X 代表黑子<br>
+> x 代表黑棋的領地<br>
+> b 代表白死子<br>
+> O 代表白子<br>
+> o 代表白棋的領地<br>
+> w 代表白死子<br>
+> . 代表不屬於任何一方的領地<br>
 
 ```json
 {
