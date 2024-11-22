@@ -194,7 +194,9 @@ Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-
 {
   "level": 3,
   "boardSize": 9,
-  "label": "G19"
+  "label": "G19",
+  "komi": 5.5,
+  "isPassed": true
 }
 ```
 
@@ -257,19 +259,19 @@ Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-
 ```json
 [
   {
-    "aiId": "1",
+    "aiId": 1,
     "name": "Bubu",
     "boarsSize": 9,
     "isPassed": true
   },
   {
-    "aiId": "2",
+    "aiId": 2,
     "name": "Tommy",
     "boarsSize": 9,
     "isPassed": true
   },
   {
-    "aiId": "3",
+    "aiId": 3,
     "name": "Sara",
     "boarsSize": 9,
     "isPassed": false
@@ -281,7 +283,7 @@ Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-
 
 ### HTTP Request
 
-`[GET] /course/game`
+`[GET] /course/{courseId}/game`
 
 ## 課程下棋闖關－取得單一關卡資訊
 
@@ -292,6 +294,7 @@ Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-
   "aiId": 1,
   "name": "Bubu",
   "boardSize": 9,
+  "komi": 5.5,
   "isPassed": true
 }
 ```
@@ -300,13 +303,14 @@ Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-
 
 ### HTTP Request
 
-`[GET] /course/game/{aiId}`
+`[GET] /course/{courseId}/game/{aiId}`
 
 ### Path Parameters
 
 | Parameter | Type   | Required | Default | Description |
 | --------- | ------ | -------- | ------- | ----------- |
-| aiId      | String | True     |         | Ai ID       |
+| courseId  | String | True     |         | 課程 ID     |
+| aiId      | Number | True     |         | Ai ID       |
 
 # 下棋相關
 
@@ -325,14 +329,19 @@ Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-
 
 ### HTTP Request
 
-`[POST] /ladder/game/move`
+`[POST] /ladder/game/{level}/move`
+
+### Path Parameters
+
+| Parameter | Type   | Required | Default | Description |
+| --------- | ------ | -------- | ------- | ----------- |
+| level     | Number | True     |         | 關卡數      |
 
 ### Body Parameters
 
 | Parameter | Type   | Required | Default | Description |
 | --------- | ------ | -------- | ------- | ----------- |
 | sgf       | String | True     |         | 棋譜 SGF    |
-| level     | Number | True     |         | 關卡數      |
 
 <aside class="notice">
 Ai 虛手時，response 的 move 回傳 pass。<br>
@@ -354,14 +363,20 @@ Ai 投子時，response 的 move 回傳 resign。<br>
 
 ### HTTP Request
 
-`[POST] /course/game/move`
+`[POST] /course/{courseId}/game/{aiId}/move`
+
+### Path Parameters
+
+| Parameter | Type   | Required | Default | Description |
+| --------- | ------ | -------- | ------- | ----------- |
+| courseId  | String | True     |         | 課程 ID     |
+| aiId      | Number | True     |         | Ai ID       |
 
 ### Body Parameters
 
 | Parameter | Type   | Required | Default | Description |
 | --------- | ------ | -------- | ------- | ----------- |
 | sgf       | String | True     |         | 棋譜 SGF    |
-| aiId      | Number | True     |         | Ai ID       |
 
 <aside class="notice">
 Ai 虛手時，response 的 move 回傳 pass。<br>
@@ -380,14 +395,19 @@ Ai 投子時，response 的 move 回傳 resign。<br>
 
 ### HTTP Request
 
-`[POST] /ladder/game/record`
+`[POST] /ladder/game/{level}/record`
+
+### Path Parameters
+
+| Parameter | Type   | Required | Default | Description |
+| --------- | ------ | -------- | ------- | ----------- |
+| level     | Number | True     |         | 關卡數      |
 
 ### Body Parameters
 
 | Parameter | Type   | Required | Default | Description             |
 | --------- | ------ | -------- | ------- | ----------------------- |
 | sgf       | String | True     |         | 棋譜 SGF                |
-| level     | Number | True     |         | 天梯關卡數              |
 | color     | String | True     |         | 使用者顏色(BLACK/WHITE) |
 | result    | String | True     |         | 對局結果                |
 
@@ -414,14 +434,20 @@ result的各種表達方式<br>
 
 ### HTTP Request
 
-`[POST] /course/game/record`
+`[POST] /course/{courseId}/game/{aiId}/record`
+
+### Path Parameters
+
+| Parameter | Type   | Required | Default | Description |
+| --------- | ------ | -------- | ------- | ----------- |
+| courseId  | String | True     |         | 課程 ID     |
+| aiId      | Number | True     |         | Ai ID       |
 
 ### Body Parameters
 
 | Parameter | Type   | Required | Default | Description             |
 | --------- | ------ | -------- | ------- | ----------------------- |
 | sgf       | String | True     |         | 棋譜 SGF                |
-| aiId      | Number | True     |         | Ai ID                   |
 | color     | String | True     |         | 使用者顏色(BLACK/WHITE) |
 | result    | String | True     |         | 對局結果                |
 
