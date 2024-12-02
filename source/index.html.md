@@ -73,6 +73,7 @@ const data = {
   sgf: '(;KM[6.5]SZ[19];B[pd];W[dp];B[pp];W[dc];B[de];W[ce];B[cf];W[cd];B[df];W[fc];B[cn])',
   level: 100,
 };
+// data 內請勿包含 value 為 undefined 的欄位
 const dataString = JSON.stringify(data);
 const signature = generateSignature(dataString);
 // NmUxNzgyZmRmMDFmNzYwZjBkYjBhNTExZTM0NWE2NGZjMDc4OTZkNjYxYjQ5MDZkMWMxNGVjYjE0ZmQwZmFmNw==
@@ -95,6 +96,39 @@ const url = 'https://api.goer.live/senserobot/ladder/game/1';
 const dataString = '/ladder/game/1';
 const signature = generateSignature(dataString);
 // NDliNjZiMzI5ZmU0NDQwMTdhMWJkZWFkOWUyNTIyMzU0YWZiMmI2Y2RkZmI3ZWUzMmFlMzc4N2E0MTk1Y2QwNA==
+
+const response = await axios({
+  method: 'get',
+  url,
+  headers: {
+    'GOER-PLATFORM': 'SENSEROBOT',
+    'GOER-TOKEN': BINDING_TOKEN,
+    'GOER-SIGNATURE': signature,
+  },
+});
+```
+
+```javascript
+// 如果是 GET 方法，而且有 query string parameters
+const url = 'https://api.goer.live/senserobot/ladder/game?end=120&start=150';
+const queryStringParameters = {
+  start: 150,
+  end: 120,
+};
+const queryStringParametersStr = Object.keys(queryStringParameters)
+  .sort()
+  .reduce((acc, key) => {
+    acc += `${key}=${queryStringParameters[key]}`;
+    return acc;
+  }, '');
+// 請先針對 queryStringParameters 做字元排序
+let dataString = '/ladder/game';
+if (queryStringParametersStr) {
+  dataString = `${dataString}?${queryStringParametersStr}`;
+  // /ladder/game?end=120&start=150
+}
+const signature = generateSignature(dataString);
+// YjAzY2YzOGUzMTMyOWJiNGI3MDZlMzgyZTZjYzUyODk0MWNiMjZhNTVkOGYzYWYyNjA3MDNmZTMyZjY5MWJiZQ==
 
 const response = await axios({
   method: 'get',
@@ -177,6 +211,20 @@ Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-
 ### HTTP Request
 
 `[GET] /ladder/game`
+
+### Query String Parameters
+
+| Parameter | Type   | Required | Default | Description |
+| --------- | ------ | -------- | ------- | ----------- |
+| range     | Number | False    |         | 關卡數      |
+| start     | Number | False    |         | 開始關卡    |
+| end       | Number | False    |         | 關卡數      |
+
+<aside class="notice">
+range、start、end 都是可選參數。<br>
+假設使用者目前通關至第 100 關，range 傳入 20，則會回傳第 80~120 關的資訊。<br>
+start 和 end 則用來控制關卡回傳範圍。start 傳入 100、end 傳入 120，則回傳第 100~120 關的資訊。<br>
+</aside>
 
 <aside class="notice">
 有標註 label 的代表星星關卡。<br>
