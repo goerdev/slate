@@ -115,16 +115,16 @@ const queryStringParameters = {
   start: 150,
   end: 120,
 };
-const queryStringParametersStr = Object.keys(queryStringParameters)
+const queryStringParametersStrs = Object.keys(queryStringParameters)
   .sort()
   .reduce((acc, key) => {
-    acc += `${key}=${queryStringParameters[key]}`;
+    acc.push(`${key}=${queryStringParameters[key]}`);
     return acc;
-  }, '');
+  }, []);
 // 請先針對 queryStringParameters 做字元排序
 let dataString = '/ladder/game';
-if (queryStringParametersStr) {
-  dataString = `${dataString}?${queryStringParametersStr}`;
+if (queryStringParametersStrs.length > 0) {
+  dataString = `${dataString}?${queryStringParametersStrs.join('&')}`;
   // /ladder/game?end=120&start=150
 }
 const signature = generateSignature(dataString);
