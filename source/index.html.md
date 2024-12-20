@@ -529,8 +529,10 @@ result的各種表達方式<br>
 ```json
 {
   "isOver": false,
-  "result": "B+5.5",
-  "influence": ["xxxwwXOOOxxxxwXXOoxxxxXXOoOxxxxXOOOoxxxxxXOOOxXxXXXXOoxxXxXXOOOxxxXxXXOOxxxXxXOOO"]
+  "result": "B+25.5",
+  "influence": ["xxxwwXOOOxxxxwXXOoxxxxXXOoOxxxxXOOOoxxxxxXOOOxXxXXXXOoxxXxXXOOOxxxXxXXOOxxxXxXOOO"],
+  "blackScore": 56, // 黑子數（黑領地+黑子數+白死子）
+  "whiteScore": 25 // 白子數（白領地+白子數+黑死子）
 }
 ```
 
