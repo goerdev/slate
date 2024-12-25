@@ -183,6 +183,7 @@ Secret Token 用來簽署簽名，並將產生的簽名置入 Headers 的 `GOER-
 | Parameter    | Type   | Required | Default | Description          |
 | ------------ | ------ | -------- | ------- | -------------------- |
 | bindingToken | String | True     |         | 掃碼得到的綁定 token |
+| id           | String | False    |         | 裝置 id              |
 
 <aside class="notice">
 可搭配上方的「簽名驗證」文檔一起閱讀。
